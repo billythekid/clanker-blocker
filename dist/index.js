@@ -125,6 +125,7 @@ run();
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runBlocker = runBlocker;
+exports.filterClankers = filterClankers;
 const GITHUB_API = "https://api.github.com";
 async function runBlocker(token, orgs, config) {
     const result = {

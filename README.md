@@ -8,7 +8,13 @@ The Bounty-Hunters repo maintains a live list of accounts caught engaging in aut
 
 ### As a GitHub Action (recommended)
 
-Add a workflow to your repo:
+This Action doesn't interact with the repository it runs in. It uses your PAT to block accounts at the user or org level. You can add the workflow to any repo you have write access to. Good choices include:
+
+- A dedicated admin/automation repo
+- Your `.github` repo (if you have one)
+- Any existing repo you use for maintenance workflows
+
+Add a workflow file:
 
 ```yaml
 name: Block Clanker Bots

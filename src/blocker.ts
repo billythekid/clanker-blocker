@@ -96,7 +96,7 @@ async function fetchClankers(sourceUrl: string): Promise<ClankerEntry[]> {
   return res.json() as Promise<ClankerEntry[]>;
 }
 
-function filterClankers(clankers: ClankerEntry[], config: BlockerConfig): ClankerEntry[] {
+export function filterClankers(clankers: ClankerEntry[], config: BlockerConfig): ClankerEntry[] {
   let filtered = clankers.filter((c) => c.total_prs >= config.minPrs);
 
   if (config.activeSince) {

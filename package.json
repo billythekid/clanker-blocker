@@ -6,6 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build src/action.ts -o dist --source-map --license licenses.txt",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
     "dev": "tsx src/index.ts",
     "action": "tsx src/action.ts",
     "lint": "eslint src/",

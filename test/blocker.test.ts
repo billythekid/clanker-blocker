@@ -68,9 +68,8 @@ describe("runBlocker", () => {
   });
 
   function mockFetch(handlers: Record<string, { status: number; body?: unknown }>) {
-    globalThis.fetch = mock.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = mock.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
       const url = typeof input === "string" ? input : input.toString();
-      const method = init?.method || "GET";
 
       for (const [pattern, response] of Object.entries(handlers)) {
         if (url.includes(pattern)) {

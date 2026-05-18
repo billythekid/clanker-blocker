@@ -9,7 +9,7 @@
     "dev": "tsx src/index.ts",
     "action": "tsx src/action.ts",
     "lint": "eslint src/",
-    "test": "node --import tsx --test src/**/*.test.ts"
+    "test": "node --import tsx --test test/**/*.test.ts"
   },
   "keywords": [
     "github",

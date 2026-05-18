@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach, mock } from "node:test";
 import assert from "node:assert/strict";
-import { filterClankers, runBlocker } from "./blocker";
-import { ClankerEntry, BlockerConfig, DEFAULT_SOURCE_URL } from "./types";
+import { filterClankers, runBlocker } from "../src/blocker";
+import { ClankerEntry, BlockerConfig, DEFAULT_SOURCE_URL } from "../src/types";
 
 const fakeClankers: ClankerEntry[] = [
   { username: "bot1", total_prs: 10, first_pr: "2026-04-01", last_pr: "2026-05-10" },

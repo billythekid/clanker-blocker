@@ -231,4 +231,88 @@ describe("runBlocker", () => {
     assert.equal(result.errors[0].username, "bot1");
     assert.equal(result.blocked.length, 2);
   });
+
+  it("throws when clankers.json fetch fails", async () => {
+    mockFetch({
+      "clankers.json": { status: 500, body: null },
+    });
+
+    const config = baseConfig();
+    await assert.rejects(
+      () => runBlocker("fake-token", [], config),
+      (err: Error) => {
+        assert.ok(err.message.includes("Failed to fetch clankers"));
+        return true;
+      }
+    );
+  });
+
+  it("handles empty clankers list gracefully", async () => {
+    mockFetch({
+      "clankers.json": { status: 200, body: [] },
+      "/user/blocks?": { status: 200, body: [] },
+    });
+
+    const config = baseConfig({ minPrs: 1 });
+    const result = await runBlocker("fake-token", [], config);
+
+    assert.equal(result.blocked.length, 0);
+    assert.equal(result.alreadyBlocked.length, 0);
+    assert.equal(result.errors.length, 0);
+  });
+
+  it("extra username in exclude list is excluded, not blocked", async () => {
+    mockFetch({
+      "clankers.json": { status: 200, body: [] },
+      "/user/blocks?": { status: 200, body: [] },
+    });
+
+    const config = baseConfig({
+      minPrs: 1,
+      extraUsernames: ["conflict-user"],
+      excludeUsernames: ["conflict-user"],
+    });
+    const result = await runBlocker("fake-token", [], config);
+
+    assert.equal(result.blocked.length, 0);
+    assert.equal(result.skipped.length, 1);
+    assert.ok(result.skipped.includes("conflict-user"));
+  });
+});
+
+describe("filterClankers edge cases", () => {
+  it("minPrs of 0 returns all entries", () => {
+    const config = baseConfig({ minPrs: 0 });
+    const result = filterClankers(fakeClankers, config);
+    assert.equal(result.length, 4);
+  });
+
+  it("negative minPrs returns all entries", () => {
+    const config = baseConfig({ minPrs: -1 });
+    const result = filterClankers(fakeClankers, config);
+    assert.equal(result.length, 4);
+  });
+
+  it("NaN minPrs returns empty (nothing >= NaN)", () => {
+    const config = baseConfig({ minPrs: NaN });
+    const result = filterClankers(fakeClankers, config);
+    assert.equal(result.length, 0);
+  });
+
+  it("invalid activeSince date filters out everything", () => {
+    const config = baseConfig({ minPrs: 1, activeSince: "not-a-date" });
+    const result = filterClankers(fakeClankers, config);
+    assert.equal(result.length, 0);
+  });
+
+  it("handles duplicate usernames in clankers list", () => {
+    const dupes: ClankerEntry[] = [
+      { username: "bot1", total_prs: 10, first_pr: "2026-04-01", last_pr: "2026-05-10" },
+      { username: "bot1", total_prs: 10, first_pr: "2026-04-01", last_pr: "2026-05-10" },
+    ];
+    const config = baseConfig({ minPrs: 5 });
+    const result = filterClankers(dupes, config);
+    // filterClankers doesn't deduplicate — both pass through
+    assert.equal(result.length, 2);
+  });
 });

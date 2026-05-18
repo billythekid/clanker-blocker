@@ -88,9 +88,9 @@ Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth ref
 ### Token setup
 
 1. Create a classic token with the appropriate scope:
-   - **[Personal blocking](https://github.com/settings/tokens/new?description=clanker-blocker&scopes=user)** — `user` scope
-   - **[Org blocking](https://github.com/settings/tokens/new?description=clanker-blocker&scopes=admin:org)** — `admin:org` scope
-   - **Fine-grained token:** "Block another user" permission (read and write) — [create here](https://github.com/settings/personal-access-tokens/new)
+   - **[Personal blocking](https://github.com/settings/tokens/new?description=clanker-blocker&scopes=user&default_expires_at=90)** — `user` scope
+   - **[Org blocking](https://github.com/settings/tokens/new?description=clanker-blocker&scopes=admin:org&default_expires_at=90)** — `admin:org` scope
+   - **Fine-grained token:** "Block another user" permission (read and write) — [create here](https://github.com/settings/personal-access-tokens/new?name=clanker-blocker&description=Blocks+Clanker+spam+accounts+detected+by+the+clanker-blocker+Action&expires_in=90&blocking=write)
 2. Add the token as a repository secret named `BLOCK_TOKEN` (or whatever you reference in your workflow)
 
 ## How it works

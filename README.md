@@ -1,8 +1,8 @@
 # Clanker Blocker
 
-Auto-block identified bot accounts from the [UnsafeLabs/Bounty-Hunters](https://github.com/UnsafeLabs/Bounty-Hunters) clankers list on your GitHub organization or personal account.
+Auto-block accounts from the [UnsafeLabs/Bounty-Hunters](https://github.com/UnsafeLabs/Bounty-Hunters) clankers list on your GitHub organization or personal account.
 
-The Bounty-Hunters repo maintains a live list of accounts caught engaging in automated PR farming against honeypot repositories. This tool fetches that list and blocks qualifying accounts so they can't interact with your repos.
+The Bounty-Hunters repo maintains a live list of accounts caught automating the opening of PRs against honeypot repositories. This tool fetches that list and blocks qualifying accounts so they can't interact with your repos.
 
 ## Usage
 
@@ -18,7 +18,7 @@ This Action doesn't interact with the repository it runs in. It uses your PAT to
 Add a workflow file:
 
 ```yaml
-name: Block Clanker Bots
+name: Block Clanker Accounts
 
 on:
   schedule:
@@ -69,7 +69,7 @@ Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth ref
 |-------|----------|---------|-------------|
 | `token` | **Yes** | — | GitHub personal access token. Classic tokens need the `user` scope for personal blocking, or `admin:org` for organization-level blocking. Fine-grained tokens need the "Block another user" permission. |
 | `org` | No | — | Organization to block users from. Accepts a single org or a comma-separated list for multiple orgs. If omitted, blocks are applied to the authenticated user's personal account. `orgs` also works as an alias. |
-| `min-prs` | No | `3` | Minimum number of PRs an account must have submitted to the honeypot repo to qualify for blocking. Higher values = more conservative (only block the most prolific bots). |
+| `min-prs` | No | `3` | Minimum number of PRs an account must have submitted to the honeypot repo to qualify for blocking. Higher values = more conservative (only block the most active accounts). |
 | `dry-run` | No | `false` | When set to `"true"`, reports which accounts would be blocked without actually blocking them. Useful for previewing the impact before committing. |
 | `active-since` | No | — | ISO 8601 date string (e.g., `2026-05-01`). Only blocks accounts whose most recent PR to the honeypot repo was on or after this date. Useful for ignoring old/stale accounts that may have already been suspended. |
 | `source-url` | No | UnsafeLabs list | Override the clankers.json source URL. Use this to point at your own fork or a custom blocklist that follows the same JSON format. |
@@ -87,12 +87,11 @@ Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth ref
 
 ### Token setup
 
-1. Go to [GitHub Settings → Personal Access Tokens](https://github.com/settings/tokens)
-2. Create a fine-grained or classic token with the appropriate scope:
-   - **Classic token, personal blocking:** `user` scope
-   - **Classic token, org blocking:** `admin:org` scope
-   - **Fine-grained token:** "Block another user" permission (read and write)
-3. Add the token as a repository secret named `BLOCK_TOKEN` (or whatever you reference in your workflow)
+1. Create a classic token with the appropriate scope:
+   - **[Personal blocking](https://github.com/settings/tokens/new?description=clanker-blocker&scopes=user)** — `user` scope
+   - **[Org blocking](https://github.com/settings/tokens/new?description=clanker-blocker&scopes=admin:org)** — `admin:org` scope
+   - **Fine-grained token:** "Block another user" permission (read and write) — [create here](https://github.com/settings/personal-access-tokens/new)
+2. Add the token as a repository secret named `BLOCK_TOKEN` (or whatever you reference in your workflow)
 
 ## How it works
 

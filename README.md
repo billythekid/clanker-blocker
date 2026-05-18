@@ -10,6 +10,7 @@ The Bounty-Hunters repo maintains a live list of accounts caught engaging in aut
 
 This Action doesn't interact with the repository it runs in. It uses your PAT to block accounts at the user or org level. You can add the workflow to any repo you have write access to. Good choices include:
 
+- Your profile repo (`username/username`)
 - A dedicated admin/automation repo
 - Your `.github` repo (if you have one)
 - Any existing repo you use for maintenance workflows

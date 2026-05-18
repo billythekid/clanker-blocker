@@ -31,30 +31,24 @@ jobs:
           # dry-run: "true"      # Test without blocking
 ```
 
-### As a CLI tool
+### Run locally (try before you commit)
+
+Clone the repo and run directly from your terminal:
 
 ```bash
-export GITHUB_TOKEN=ghp_xxx
-export GITHUB_ORG=my-org    # Optional: omit for personal account
-export MIN_PRS=3            # Optional: default 3
-export DRY_RUN=true         # Optional: test mode
+cd clanker-blocker
 
-npx clanker-blocker
+# Dry run — see what would be blocked without blocking anything
+DRY_RUN=true GITHUB_TOKEN=$(gh auth token) MIN_PRS=5 npx tsx src/index.ts
+
+# Block on your personal account
+GITHUB_TOKEN=$(gh auth token) MIN_PRS=5 npx tsx src/index.ts
+
+# Block on an org
+GITHUB_TOKEN=$(gh auth token) GITHUB_ORG=my-org MIN_PRS=5 npx tsx src/index.ts
 ```
 
-### As a library
-
-```typescript
-import { runBlocker } from "clanker-blocker";
-
-const result = await runBlocker({
-  token: "ghp_xxx",
-  org: "my-org",
-  config: { minPrs: 5, dryRun: false },
-});
-
-console.log(`Blocked ${result.blocked.length} accounts`);
-```
+Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth refresh -h github.com -s user`).
 
 ## Configuration
 

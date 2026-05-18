@@ -33,7 +33,8 @@ jobs:
         uses: billythekid/clanker-blocker@v1
         with:
           token: ${{ secrets.BLOCK_TOKEN }}
-          # org: my-org          # For org-level blocking
+          # org: my-org            # Single org
+          # orgs: org1,org2,org3   # Multiple orgs
           min-prs: "3"           # Minimum PRs to qualify
           # dry-run: "true"      # Test without blocking
 ```
@@ -53,6 +54,9 @@ GITHUB_TOKEN=$(gh auth token) MIN_PRS=5 npx tsx src/index.ts
 
 # Block on an org
 GITHUB_TOKEN=$(gh auth token) GITHUB_ORG=my-org MIN_PRS=5 npx tsx src/index.ts
+
+# Block on multiple orgs
+GITHUB_TOKEN=$(gh auth token) GITHUB_ORGS=org1,org2 MIN_PRS=5 npx tsx src/index.ts
 ```
 
 Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth refresh -h github.com -s user`).
@@ -64,7 +68,7 @@ Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth ref
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `token` | **Yes** | — | GitHub personal access token. Classic tokens need the `user` scope for personal blocking, or `admin:org` for organization-level blocking. Fine-grained tokens need the "Block another user" permission. |
-| `org` | No | — | The organization to block users from. If omitted, blocks are applied to the authenticated user's personal account. |
+| `org` | No | — | Organization to block users from. Accepts a single org or a comma-separated list for multiple orgs. If omitted, blocks are applied to the authenticated user's personal account. `orgs` also works as an alias. |
 | `min-prs` | No | `3` | Minimum number of PRs an account must have submitted to the honeypot repo to qualify for blocking. Higher values = more conservative (only block the most prolific bots). |
 | `dry-run` | No | `false` | When set to `"true"`, reports which accounts would be blocked without actually blocking them. Useful for previewing the impact before committing. |
 | `active-since` | No | — | ISO 8601 date string (e.g., `2026-05-01`). Only blocks accounts whose most recent PR to the honeypot repo was on or after this date. Useful for ignoring old/stale accounts that may have already been suspended. |

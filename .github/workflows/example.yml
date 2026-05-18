@@ -18,6 +18,7 @@ jobs:
         uses: billythekid/clanker-blocker@v1
         with:
           token: ${{ secrets.BLOCK_TOKEN }}
-          # org: my-org  # Uncomment for org-level blocking
+          # org: my-org              # Uncomment for org-level blocking
+          # org: org1,org2,org3     # Or block across multiple orgs
           min-prs: "3"
           # dry-run: "true"  # Uncomment to test without blocking

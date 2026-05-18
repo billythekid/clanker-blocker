@@ -1,0 +1,23 @@
+# Example workflow: Run Clanker Blocker on a schedule
+#
+# Add this to your repo at .github/workflows/clanker-blocker.yml
+
+name: Block Clanker Bots
+
+on:
+  schedule:
+    # Run daily at 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block clanker accounts
+        uses: billythekid/clanker-blocker@v1
+        with:
+          token: ${{ secrets.BLOCK_TOKEN }}
+          # org: my-org  # Uncomment for org-level blocking
+          min-prs: "3"
+          # dry-run: "true"  # Uncomment to test without blocking

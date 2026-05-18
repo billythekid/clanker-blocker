@@ -1,0 +1,49 @@
+name: "Clanker Blocker"
+description: "Auto-block identified bot accounts from the UnsafeLabs/Bounty-Hunters clankers list"
+author: "billythekid"
+
+inputs:
+  token:
+    description: "GitHub token with user:block or admin:org scope"
+    required: true
+  org:
+    description: "Organization to block users from (omit for personal account)"
+    required: false
+  min-prs:
+    description: "Minimum PR count to qualify for blocking"
+    required: false
+    default: "3"
+  dry-run:
+    description: "If true, only report what would be blocked"
+    required: false
+    default: "false"
+  active-since:
+    description: "Only block accounts active after this ISO date"
+    required: false
+  source-url:
+    description: "Override the clankers.json source URL (e.g., point to your own fork)"
+    required: false
+  extra-usernames:
+    description: "Comma-separated list of additional usernames to block (beyond the clankers list)"
+    required: false
+  exclude-usernames:
+    description: "Comma-separated list of usernames to never block, even if they appear on the list"
+    required: false
+
+outputs:
+  blocked-count:
+    description: "Number of newly blocked accounts"
+  already-blocked-count:
+    description: "Number of accounts already blocked"
+  error-count:
+    description: "Number of accounts that failed to block"
+  blocked-users:
+    description: "JSON array of newly blocked usernames"
+
+runs:
+  using: "node22"
+  main: "dist/action.js"
+
+branding:
+  icon: "shield"
+  color: "red"

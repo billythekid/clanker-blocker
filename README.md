@@ -56,7 +56,7 @@ Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth ref
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `token` | **Yes** | — | GitHub personal access token. Needs `user:block` scope for personal account blocking, or `admin:org` scope for organization-level blocking. |
+| `token` | **Yes** | — | GitHub personal access token. Classic tokens need the `user` scope for personal blocking, or `admin:org` for organization-level blocking. Fine-grained tokens need the "Block another user" permission. |
 | `org` | No | — | The organization to block users from. If omitted, blocks are applied to the authenticated user's personal account. |
 | `min-prs` | No | `3` | Minimum number of PRs an account must have submitted to the honeypot repo to qualify for blocking. Higher values = more conservative (only block the most prolific bots). |
 | `dry-run` | No | `false` | When set to `"true"`, reports which accounts would be blocked without actually blocking them. Useful for previewing the impact before committing. |
@@ -78,8 +78,9 @@ Requires Node 22+ and the `gh` CLI authenticated with `user` scope (`gh auth ref
 
 1. Go to [GitHub Settings → Personal Access Tokens](https://github.com/settings/tokens)
 2. Create a fine-grained or classic token with the appropriate scope:
-   - **Personal account blocking:** `user:block`
-   - **Organization blocking:** `admin:org`
+   - **Classic token, personal blocking:** `user` scope
+   - **Classic token, org blocking:** `admin:org` scope
+   - **Fine-grained token:** "Block another user" permission (read and write)
 3. Add the token as a repository secret named `BLOCK_TOKEN` (or whatever you reference in your workflow)
 
 ## How it works

@@ -15,7 +15,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const org = process.env.GITHUB_ORG || undefined;
+  const orgs = parseList(process.env.GITHUB_ORGS || process.env.GITHUB_ORG || "");
   const minPrs = parseInt(process.env.MIN_PRS || "3", 10);
   const dryRun = process.env.DRY_RUN === "true";
   const activeSince = process.env.ACTIVE_SINCE || undefined;
@@ -32,13 +32,14 @@ async function main(): Promise<void> {
     excludeUsernames,
   };
 
-  console.log("🤖 Clanker Blocker");
-  console.log(`   Target: ${org ? `org/${org}` : "personal account"}`);
+  const target = orgs.length > 0 ? orgs.map((o) => `org/${o}`).join(", ") : "personal account";
+  console.log("Clanker Blocker");
+  console.log(`   Target: ${target}`);
   console.log(`   Min PRs: ${minPrs}`);
   console.log(`   Dry run: ${dryRun}`);
   console.log();
 
-  const result = await runBlocker(token, org, config);
+  const result = await runBlocker(token, orgs, config);
 
   console.log();
   console.log("=== Results ===");

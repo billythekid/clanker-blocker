@@ -5,7 +5,7 @@ import * as fs from "fs";
 async function run(): Promise<void> {
   try {
     const token = getInput("token", true);
-    const org = getInput("org") || undefined;
+    const orgs = parseList(getInput("orgs") || getInput("org"));
     const minPrs = parseInt(getInput("min-prs") || "3", 10);
     const dryRun = getInput("dry-run") === "true";
     const activeSince = getInput("active-since") || undefined;
@@ -22,7 +22,7 @@ async function run(): Promise<void> {
       excludeUsernames,
     };
 
-    const result = await runBlocker(token, org, config);
+    const result = await runBlocker(token, orgs, config);
 
     setOutput("blocked-count", String(result.blocked.length));
     setOutput("already-blocked-count", String(result.alreadyBlocked.length));

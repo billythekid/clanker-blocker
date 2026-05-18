@@ -4,7 +4,7 @@ const GITHUB_API = "https://api.github.com";
 
 export async function runBlocker(
   token: string,
-  org: string | undefined,
+  orgs: string[],
   config: BlockerConfig
 ): Promise<BlockResult> {
   const result: BlockResult = {
@@ -36,36 +36,52 @@ export async function runBlocker(
     (excludeSet.size ? `, ${excludeSet.size} excluded` : "")
   );
 
-  const currentlyBlocked = await getBlockedUsers(token, org);
-  const blockedSet = new Set(currentlyBlocked.map((u) => u.toLowerCase()));
+  // Determine blocking targets: list of orgs, or personal account (undefined)
+  const blockingTargets: Array<string | undefined> = orgs.length > 0 ? orgs : [undefined];
 
-  for (const clanker of allTargets) {
-    const username = clanker.username;
+  for (const org of blockingTargets) {
+    const label = org ? `org/${org}` : "personal account";
+    console.log(`\nBlocking on: ${label}`);
 
-    if (excludeSet.has(username.toLowerCase())) {
-      result.skipped.push(username);
-      continue;
-    }
-
-    if (blockedSet.has(username.toLowerCase())) {
-      result.alreadyBlocked.push(username);
-      continue;
-    }
-
-    if (config.dryRun) {
-      console.log(`[DRY RUN] Would block: ${username} (${clanker.total_prs} PRs)`);
-      result.blocked.push(username);
-      continue;
-    }
-
+    let currentlyBlocked: string[];
     try {
-      await blockUser(token, username, org);
-      result.blocked.push(username);
-      console.log(`Blocked: ${username} (${clanker.total_prs} PRs)`);
+      currentlyBlocked = await getBlockedUsers(token, org);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      result.errors.push({ username, error: message });
-      console.error(`Failed to block ${username}: ${message}`);
+      console.error(`Failed to access ${label}: ${message}. Skipping.`);
+      result.errors.push({ username: `[${label}]`, error: message });
+      continue;
+    }
+    const blockedSet = new Set(currentlyBlocked.map((u) => u.toLowerCase()));
+
+    for (const clanker of allTargets) {
+      const username = clanker.username;
+
+      if (excludeSet.has(username.toLowerCase())) {
+        result.skipped.push(username);
+        continue;
+      }
+
+      if (blockedSet.has(username.toLowerCase())) {
+        result.alreadyBlocked.push(username);
+        continue;
+      }
+
+      if (config.dryRun) {
+        console.log(`[DRY RUN] Would block: ${username} (${clanker.total_prs} PRs)`);
+        result.blocked.push(username);
+        continue;
+      }
+
+      try {
+        await blockUser(token, username, org);
+        result.blocked.push(username);
+        console.log(`Blocked: ${username} (${clanker.total_prs} PRs)`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        result.errors.push({ username, error: message });
+        console.error(`Failed to block ${username}: ${message}`);
+      }
     }
   }
 

@@ -46,7 +46,7 @@ const fs = __importStar(__nccwpck_require__(896));
 async function run() {
     try {
         const token = getInput("token", true);
-        const org = getInput("org") || undefined;
+        const orgs = parseList(getInput("orgs") || getInput("org"));
         const minPrs = parseInt(getInput("min-prs") || "3", 10);
         const dryRun = getInput("dry-run") === "true";
         const activeSince = getInput("active-since") || undefined;
@@ -61,7 +61,7 @@ async function run() {
             extraUsernames,
             excludeUsernames,
         };
-        const result = await (0, blocker_1.runBlocker)(token, org, config);
+        const result = await (0, blocker_1.runBlocker)(token, orgs, config);
         setOutput("blocked-count", String(result.blocked.length));
         setOutput("already-blocked-count", String(result.alreadyBlocked.length));
         setOutput("error-count", String(result.errors.length));
@@ -126,7 +126,7 @@ run();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runBlocker = runBlocker;
 const GITHUB_API = "https://api.github.com";
-async function runBlocker(token, org, config) {
+async function runBlocker(token, orgs, config) {
     const result = {
         blocked: [],
         alreadyBlocked: [],
@@ -148,32 +148,47 @@ async function runBlocker(token, org, config) {
     console.log(`Found ${clankers.length} total clankers, ${targets.length} meet threshold (≥${config.minPrs} PRs)` +
         (extraEntries.length ? `, +${extraEntries.length} extra` : "") +
         (excludeSet.size ? `, ${excludeSet.size} excluded` : ""));
-    const currentlyBlocked = await getBlockedUsers(token, org);
-    const blockedSet = new Set(currentlyBlocked.map((u) => u.toLowerCase()));
-    for (const clanker of allTargets) {
-        const username = clanker.username;
-        if (excludeSet.has(username.toLowerCase())) {
-            result.skipped.push(username);
-            continue;
-        }
-        if (blockedSet.has(username.toLowerCase())) {
-            result.alreadyBlocked.push(username);
-            continue;
-        }
-        if (config.dryRun) {
-            console.log(`[DRY RUN] Would block: ${username} (${clanker.total_prs} PRs)`);
-            result.blocked.push(username);
-            continue;
-        }
+    // Determine blocking targets: list of orgs, or personal account (undefined)
+    const blockingTargets = orgs.length > 0 ? orgs : [undefined];
+    for (const org of blockingTargets) {
+        const label = org ? `org/${org}` : "personal account";
+        console.log(`\nBlocking on: ${label}`);
+        let currentlyBlocked;
         try {
-            await blockUser(token, username, org);
-            result.blocked.push(username);
-            console.log(`Blocked: ${username} (${clanker.total_prs} PRs)`);
+            currentlyBlocked = await getBlockedUsers(token, org);
         }
         catch (err) {
             const message = err instanceof Error ? err.message : String(err);
-            result.errors.push({ username, error: message });
-            console.error(`Failed to block ${username}: ${message}`);
+            console.error(`Failed to access ${label}: ${message}. Skipping.`);
+            result.errors.push({ username: `[${label}]`, error: message });
+            continue;
+        }
+        const blockedSet = new Set(currentlyBlocked.map((u) => u.toLowerCase()));
+        for (const clanker of allTargets) {
+            const username = clanker.username;
+            if (excludeSet.has(username.toLowerCase())) {
+                result.skipped.push(username);
+                continue;
+            }
+            if (blockedSet.has(username.toLowerCase())) {
+                result.alreadyBlocked.push(username);
+                continue;
+            }
+            if (config.dryRun) {
+                console.log(`[DRY RUN] Would block: ${username} (${clanker.total_prs} PRs)`);
+                result.blocked.push(username);
+                continue;
+            }
+            try {
+                await blockUser(token, username, org);
+                result.blocked.push(username);
+                console.log(`Blocked: ${username} (${clanker.total_prs} PRs)`);
+            }
+            catch (err) {
+                const message = err instanceof Error ? err.message : String(err);
+                result.errors.push({ username, error: message });
+                console.error(`Failed to block ${username}: ${message}`);
+            }
         }
     }
     return result;
